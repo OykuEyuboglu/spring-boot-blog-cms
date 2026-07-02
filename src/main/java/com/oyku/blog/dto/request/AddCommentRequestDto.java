@@ -1,0 +1,18 @@
+package com.oyku.blog.dto.request;
+
+import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class AddCommentRequestDto {
+	private String commenterName;
+	private String content;
+	private LocalDateTime createdAt;
+}
