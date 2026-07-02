@@ -10,6 +10,7 @@ import com.oyku.blog.dto.request.CreatePostRequestDto;
 import com.oyku.blog.dto.response.PostResponseDto;
 import com.oyku.blog.service.PostService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,7 +21,7 @@ public class PostController {
 	private final PostService postService;
 
 	@PostMapping
-	public ResponseEntity<PostResponseDto> createPost(@RequestBody CreatePostRequestDto createPostRequestDto) {
+	public ResponseEntity<PostResponseDto> createPost(@Valid @RequestBody CreatePostRequestDto createPostRequestDto) {
 
 		PostResponseDto createdPost = postService.createPost(createPostRequestDto);
 
