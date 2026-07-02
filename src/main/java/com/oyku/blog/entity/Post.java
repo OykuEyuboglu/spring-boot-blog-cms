@@ -3,6 +3,7 @@ package com.oyku.blog.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -35,7 +36,7 @@ public class Post {
 	
 	@Id
 	@Column(name = "id", nullable = false, updatable = false, unique = true)
-	private String id;
+    private String id = UUID.randomUUID().toString();
 	
 	@Column(name = "title", nullable = false)
 	private String title;
@@ -66,7 +67,7 @@ public class Post {
     private Category category;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "comments", columnDefinition = "jsonb", nullable = false)
+    @Column(name = "comments", columnDefinition = "jsonb", nullable = true)
     private List<Comment> comments = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
@@ -80,6 +81,10 @@ public class Post {
 		
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
+	
+		if (this.status == null) {
+			this.status = PostStatus.DRAFT;
+		}
 	}
 	
 	@PreUpdate
