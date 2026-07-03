@@ -6,18 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.oyku.blog.dto.request.CreatePostRequestDto;
-import com.oyku.blog.dto.request.UpdatePostRequestDto;
-import com.oyku.blog.dto.response.PostResponseDto;
+import com.oyku.blog.dto.request.post.CreatePostRequestDto;
+import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
+import com.oyku.blog.dto.response.post.PostResponseDto;
 import com.oyku.blog.service.PostService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-
-
-//PUBLİSHİN DRAFTINI YAZ
-
 
 @RestController
 @RequestMapping("/api/posts")
@@ -41,44 +37,39 @@ public class PostController {
 
 		return ResponseEntity.ok(posts);
 	}
-	
+
 	@GetMapping("/{id}")
 	public ResponseEntity<PostResponseDto> getPostById(@PathVariable String id) {
-		
+
 		PostResponseDto post = postService.getPostById(id);
-		
+
 		return ResponseEntity.ok(post);
 	}
-	
-	
-	@PutMapping("/{id}")
-	public ResponseEntity<PostResponseDto> updatePost(
-	        @PathVariable String id,
-	        @Valid @RequestBody UpdatePostRequestDto updatePostRequestDto) {
 
-	    PostResponseDto updatedPost = postService.updatePost(id, updatePostRequestDto);
-	    return ResponseEntity.ok(updatedPost);
+	@PatchMapping("/{id}")
+	public ResponseEntity<PostResponseDto> updatePost(@PathVariable String id,
+			@Valid @RequestBody UpdatePostRequestDto updatePostRequestDto) {
+
+		PostResponseDto updatedPost = postService.updatePost(id, updatePostRequestDto);
+		return ResponseEntity.ok(updatedPost);
 	}
-	
-	
+
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deletePost(@PathVariable String id) {
-	    postService.deletePost(id);
-	    return ResponseEntity.noContent().build();
+		postService.deletePost(id);
+		return ResponseEntity.noContent().build();
 	}
-	
-	
+
 	@PatchMapping("/{id}/publish")
 	public ResponseEntity<PostResponseDto> publishPost(@PathVariable String id) {
-	    PostResponseDto publishedPost = postService.publishPost(id);
-	    return ResponseEntity.ok(publishedPost);
+		PostResponseDto publishedPost = postService.publishPost(id);
+		return ResponseEntity.ok(publishedPost);
 	}
-	
+
 	@PatchMapping("/{id}/draft")
 	public ResponseEntity<PostResponseDto> draftPost(@PathVariable String id) {
-	    PostResponseDto draftedPost = postService.publishPost(id);
-	    return ResponseEntity.ok(draftedPost);
+		PostResponseDto draftedPost = postService.publishPost(id);
+		return ResponseEntity.ok(draftedPost);
 	}
-	
-	
+
 }

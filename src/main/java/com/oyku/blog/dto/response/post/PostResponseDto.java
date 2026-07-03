@@ -1,9 +1,9 @@
-package com.oyku.blog.dto.response;
+package com.oyku.blog.dto.response.post;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.oyku.blog.enums.Category;
+import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.enums.PostStatus;
 
 import lombok.Getter;
@@ -20,7 +20,7 @@ public class PostResponseDto {
 	private String authorName;
 	private List<String> tags;
 	private PostStatus status;
-	private Category category;
+	private Long categoryId;
 	private List<CommentResponseDto> comments;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
