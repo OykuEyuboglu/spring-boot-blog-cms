@@ -1,8 +1,6 @@
-package com.oyku.blog.dto.request;
+package com.oyku.blog.dto.request.post;
 
 import java.util.List;
-
-import com.oyku.blog.enums.Category;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -44,5 +42,5 @@ public class CreatePostRequestDto {
     > tags;
 
     @NotNull(message = "Category can't be empty.")
-    private Category category;
-}
+    private Long categoryId;
+    }

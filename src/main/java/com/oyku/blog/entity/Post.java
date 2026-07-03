@@ -8,7 +8,6 @@ import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import com.oyku.blog.enums.Category;
 import com.oyku.blog.enums.PostStatus;
 import com.oyku.blog.model.Comment;
 
@@ -18,8 +17,10 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -62,10 +63,11 @@ public class Post {
     @Column(name = "status", nullable = false)
     private PostStatus status = PostStatus.DRAFT;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "category", nullable = false)
-    private Category category;
-
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "category_id", nullable = false)
+	private Category category;
+	
+	
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "comments", columnDefinition = "jsonb", nullable = true)
     private List<Comment> comments = new ArrayList<>();

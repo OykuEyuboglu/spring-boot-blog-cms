@@ -1,4 +1,4 @@
-package com.oyku.blog.dto.request;
+package com.oyku.blog.dto.response.comment;
 
 import java.time.LocalDateTime;
 
@@ -11,8 +11,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddCommentRequestDto {
+public class CommentResponseDto {
+	private String id;
 	private String commenterName;
 	private String content;
 	private LocalDateTime createdAt;
+
 }
