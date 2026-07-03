@@ -3,10 +3,22 @@ package com.oyku.blog.service;
 import java.util.List;
 
 import com.oyku.blog.dto.request.CreatePostRequestDto;
+import com.oyku.blog.dto.request.UpdatePostRequestDto;
 import com.oyku.blog.dto.response.PostResponseDto;
 
 public interface PostService {
 	PostResponseDto createPost(CreatePostRequestDto createPostRequestDto);
 
 	List<PostResponseDto> getAllPosts();
+	
+	PostResponseDto getPostById(String id);
+	
+	PostResponseDto updatePost(String id, UpdatePostRequestDto updatePostRequestDto);
+	
+	void deletePost(String id);
+	
+	PostResponseDto publishPost(String id);
+	
+	PostResponseDto draftPost(String id);
+
 }
