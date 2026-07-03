@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException exception,
+	public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException exception,
 			HttpServletRequest request) {
 
 		Map<String, List<String>> validationErrors = new LinkedHashMap<>();
@@ -31,27 +31,36 @@ public class GlobalExceptionHandler {
 			validationErrors.computeIfAbsent(fieldName, key -> new ArrayList<>()).add(errorMessage);
 		});
 
-		Map<String, Object> response = new LinkedHashMap<>();
-		response.put("timestamp", LocalDateTime.now());
-		response.put("status", HttpStatus.BAD_REQUEST.value());
-		response.put("error", "Validation Error");
-		response.put("path", request.getRequestURI());
-		response.put("messages", validationErrors);
+		ErrorResponse response = new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(),
+				"Validation Error", request.getRequestURI(), validationErrors);
 
 		return ResponseEntity.badRequest().body(response);
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
-	public ResponseEntity<Map<String, Object>> handleInvalidJsonException(HttpMessageNotReadableException exception,
+	public ResponseEntity<ErrorResponse> handleInvalidJsonException(HttpMessageNotReadableException exception,
 			HttpServletRequest request) {
 
-		Map<String, Object> response = new LinkedHashMap<>();
-		response.put("timestamp", LocalDateTime.now());
-		response.put("status", HttpStatus.BAD_REQUEST.value());
-		response.put("error", "Invalid JSON");
-		response.put("path", request.getRequestURI());
-		response.put("message", "JSON formatı hatalı veya enum değeri yanlış girildi.");
+		ErrorResponse response = new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), "Invalid JSON",
+				request.getRequestURI(), "The JSON format is invalid, or the enum value was entered incorrectly.");
 
 		return ResponseEntity.badRequest().body(response);
 	}
+
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+			ResourceNotFoundException exception,
+			HttpServletRequest request){
+		
+		ErrorResponse response = new ErrorResponse(
+				LocalDateTime.now(),
+				HttpStatus.NOT_FOUND.value(),
+				"Not Found",
+				request.getRequestURI(),
+				exception.getMessage()
+				);
+		
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+				}
+
 }

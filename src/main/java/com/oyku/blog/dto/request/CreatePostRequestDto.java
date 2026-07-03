@@ -19,30 +19,30 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CreatePostRequestDto {
 
-    @NotBlank(message = "Title boş olamaz.")
-    @Size(max = 100, message = "Title en fazla 100 karakter olmalıdır.")
+    @NotBlank(message = "Title can't be empty.")
+    @Size(max = 100, message = "Title must be maximum of 500 characters.")
     private String title;
 
-    @NotBlank(message = "Summary boş olamaz.")
-    @Size(max = 400, message = "Summary en fazla 400 karakter olmalıdır.")
+    @NotBlank(message = "Summary can't be empty.")
+    @Size(max = 400, message = "Summary must be maximum of 400 characters.")
     private String summary;
 
-    @NotBlank(message = "Content boş olamaz.")
-    @Size(max = 5000, message = "Content en fazla 5000 karakter olmalıdır.")
+    @NotBlank(message = "Content can't be empty.")
+    @Size(max = 5000, message = "Content must be maximum of 5000 characters.")
     private String content;
 
-    @NotBlank(message = "Author name boş olamaz.")
-    @Size(max = 60, message = "Author name en fazla 60 karakter olmalıdır.")
+    @NotBlank(message = "Author name can't be empty.")
+    @Size(max = 60, message = "Author name must be maximum of 60 characters.")
     private String authorName;
 
-    @NotEmpty(message = "En az bir tag girilmelidir.")
-    @Size(max = 6, message = "En fazla 6 tag girilebilir.")
+    @NotEmpty(message = "Tag can not be empty.")
+    @Size(max = 6, message = "A maximum of 6 tags can be entered.")
     private List<
-            @NotBlank(message = "Tag boş olamaz.")
-            @Size(max = 30, message = "Tag en fazla 30 karakter olabilir.")
+            @NotBlank(message = "Tag can't be empty.")
+            @Size(max = 30, message = "Tag must be maximum of 30 characters.")
             String
     > tags;
 
-    @NotNull(message = "Category boş olamaz.")
+    @NotNull(message = "Category can't be empty.")
     private Category category;
 }
