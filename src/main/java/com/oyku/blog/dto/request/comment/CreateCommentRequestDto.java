@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddCommentRequestDto {
+public class CreateCommentRequestDto {
 	private String commenterName;
 	private String content;
 	private LocalDateTime createdAt;
