@@ -5,6 +5,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,15 +54,6 @@ public class PostServiceImpl implements PostService {
 
 		Post savedPost = postRepository.save(post);
 		return postMapper.toResponseDto(savedPost);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<PostResponseDto> getAllPosts() {
-
-		List<Post> posts = postRepository.findAll();
-
-		return postMapper.toResponseDtoList(posts);
 	}
 
 	@Override
@@ -130,6 +125,18 @@ public class PostServiceImpl implements PostService {
 	public Post findPostbyIdOrThrow(String id) {
 
 		return postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post does not exist."));
+	}
+
+	@Override
+	@Transactional
+	public Page<PostResponseDto> getPosts(int page, int size) {
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+		Page<Post> postsPage = postRepository.findAll(pageable);
+
+		return postsPage.map(postMapper::toResponseDto);
+
 	}
 
 	@Override

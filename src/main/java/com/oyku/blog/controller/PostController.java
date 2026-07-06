@@ -2,6 +2,7 @@ package com.oyku.blog.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,14 +34,6 @@ public class PostController {
 		PostResponseDto createdPost = postService.createPost(createPostRequestDto);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
-	}
-
-	@GetMapping
-	public ResponseEntity<List<PostResponseDto>> getAllPosts() {
-
-		List<PostResponseDto> posts = postService.getAllPosts();
-
-		return ResponseEntity.ok(posts);
 	}
 
 	@GetMapping("/{id}")
@@ -77,6 +70,11 @@ public class PostController {
 		return ResponseEntity.ok(draftedPost);
 	}
 
+	@GetMapping
+	public ResponseEntity<Page<PostResponseDto>> getPosts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+		return ResponseEntity.ok(postService.getPosts(page, size));
+	}
+	
 	@PostMapping("/{id}/comments")
 	public ResponseEntity<String> addComment(@PathVariable String id,
 			@RequestBody @Valid CreateCommentRequestDto request) {
