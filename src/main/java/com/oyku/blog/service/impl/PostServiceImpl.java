@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
 import com.oyku.blog.dto.request.post.CreatePostRequestDto;
+import com.oyku.blog.dto.request.post.SearchPostRequest;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
 import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
@@ -22,6 +23,7 @@ import com.oyku.blog.model.Comment;
 import com.oyku.blog.repository.CategoryRepository;
 import com.oyku.blog.repository.PostRepository;
 import com.oyku.blog.service.PostService;
+import com.oyku.blog.specification.PostSpecification;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,9 +41,10 @@ public class PostServiceImpl implements PostService {
 	public PostResponseDto createPost(CreatePostRequestDto createPostRequestDto) {
 
 		Post post = postMapper.toEntity(createPostRequestDto);
-		
-		Category category = categoryRepository.findById(createPostRequestDto.getCategoryId()).orElseThrow(() -> new RuntimeException("Category does not exist."));
-		
+
+		Category category = categoryRepository.findById(createPostRequestDto.getCategoryId())
+				.orElseThrow(() -> new RuntimeException("Category does not exist."));
+
 		post.setCategory(category);
 		post.setStatus(PostStatus.DRAFT);
 
@@ -63,21 +66,19 @@ public class PostServiceImpl implements PostService {
 	public PostResponseDto getPostById(String id) {
 
 		Post post = findPostbyIdOrThrow(id);
-		
+
 		return postMapper.toResponseDto(post);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public List<CommentResponseDto> getCommentsByPostId(String id) {
-				
-	        Post post = findPostbyIdOrThrow(id);
 
-	        return commentMapperImpl.toResponseDtos(post.getComments());
+		Post post = findPostbyIdOrThrow(id);
+
+		return commentMapperImpl.toResponseDtos(post.getComments());
 	}
-	
-	
-	
+
 	@Override
 	@Transactional
 	public PostResponseDto updatePost(String id, UpdatePostRequestDto request) {
@@ -123,28 +124,39 @@ public class PostServiceImpl implements PostService {
 		Post draftPost = postRepository.save(post);
 		return postMapper.toResponseDto(draftPost);
 	}
-	
+
 	@Override
-	public Post findPostbyIdOrThrow(String id) {	
-		
+	@Transactional
+	public Post findPostbyIdOrThrow(String id) {
+
 		return postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post does not exist."));
 	}
-	
+
+	@Override
+	@Transactional
+	public List<PostResponseDto> searchPosts(SearchPostRequest request) {
+
+		List<Post> posts = postRepository.findAll(PostSpecification.search(request));
+
+		return postMapper.toResponseDtoList(posts);
+
+	}
+
 	@Override
 	@Transactional
 	public PostResponseDto addComment(String id, CreateCommentRequestDto request) {
-		
+
 		Post post = findPostbyIdOrThrow(id);
-		
+
 		Comment comment = new Comment();
 		comment.setId(UUID.randomUUID().toString());
 		comment.setCommenterName(request.getCommenterName());
 		comment.setContent(request.getContent());
 		comment.setCreatedAt(LocalDateTime.now());
-		
+
 		post.getComments().add(comment);
 		Post savedPost = postRepository.save(post);
 		return postMapper.toResponseDto(savedPost);
-		}
+	}
 
 }

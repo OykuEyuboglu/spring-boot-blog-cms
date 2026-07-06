@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
 import com.oyku.blog.dto.request.post.CreatePostRequestDto;
+import com.oyku.blog.dto.request.post.SearchPostRequest;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
 import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
@@ -29,4 +30,6 @@ public interface PostService {
 	PostResponseDto addComment(String id, CreateCommentRequestDto request);
 	
 	List<CommentResponseDto> getCommentsByPostId(String id);
+	
+	List<PostResponseDto> searchPosts(SearchPostRequest request);
 }

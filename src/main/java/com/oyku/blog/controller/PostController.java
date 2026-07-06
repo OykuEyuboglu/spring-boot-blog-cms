@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
 import com.oyku.blog.dto.request.post.CreatePostRequestDto;
+import com.oyku.blog.dto.request.post.SearchPostRequest;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
 import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
@@ -18,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
-
 
 @RestController
 @RequestMapping("/api/posts")
@@ -76,24 +76,26 @@ public class PostController {
 		PostResponseDto draftedPost = postService.publishPost(id);
 		return ResponseEntity.ok(draftedPost);
 	}
-	
-	
-	
-	
+
 	@PostMapping("/{id}/comments")
-	public ResponseEntity<String> addComment(@PathVariable String id, @RequestBody @Valid CreateCommentRequestDto request) {
-		
+	public ResponseEntity<String> addComment(@PathVariable String id,
+			@RequestBody @Valid CreateCommentRequestDto request) {
+
 		postService.addComment(id, request);
 		return ResponseEntity.ok("Comment added successfully");
 	}
-	
+
 	@GetMapping("/{id}/comments")
-	public ResponseEntity<List<CommentResponseDto>>getCommentsById(@PathVariable String id){
-				
+	public ResponseEntity<List<CommentResponseDto>> getCommentsById(@PathVariable String id) {
+
 		List<CommentResponseDto> comments = postService.getCommentsByPostId(id);
 
 		return ResponseEntity.ok(comments);
 	}
-	
 
+	@PostMapping("/search")
+	public ResponseEntity<List<PostResponseDto>> searchPosts(@RequestBody SearchPostRequest request) {
+
+		return ResponseEntity.ok(postService.searchPosts(request));
+	}
 }
