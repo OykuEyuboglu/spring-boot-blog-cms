@@ -1,18 +1,24 @@
 package com.oyku.blog.service.impl;
 
+import com.oyku.blog.mapper.CommentMapperImpl;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
 import com.oyku.blog.dto.request.post.CreatePostRequestDto;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
+import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
 import com.oyku.blog.entity.Category;
 import com.oyku.blog.entity.Post;
 import com.oyku.blog.enums.PostStatus;
 import com.oyku.blog.exception.ResourceNotFoundException;
 import com.oyku.blog.mapper.PostMapper;
+import com.oyku.blog.model.Comment;
 import com.oyku.blog.repository.CategoryRepository;
 import com.oyku.blog.repository.PostRepository;
 import com.oyku.blog.service.PostService;
@@ -23,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
+	private final CommentMapperImpl commentMapperImpl;
 	private final PostRepository postRepository;
 	private final CategoryRepository categoryRepository;
 	private final PostMapper postMapper;
@@ -60,6 +67,17 @@ public class PostServiceImpl implements PostService {
 		return postMapper.toResponseDto(post);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<CommentResponseDto> getCommentsByPostId(String id) {
+				
+	        Post post = findPostbyIdOrThrow(id);
+
+	        return commentMapperImpl.toResponseDtos(post.getComments());
+	}
+	
+	
+	
 	@Override
 	@Transactional
 	public PostResponseDto updatePost(String id, UpdatePostRequestDto request) {
@@ -111,5 +129,22 @@ public class PostServiceImpl implements PostService {
 		
 		return postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post does not exist."));
 	}
+	
+	@Override
+	@Transactional
+	public PostResponseDto addComment(String id, CreateCommentRequestDto request) {
+		
+		Post post = findPostbyIdOrThrow(id);
+		
+		Comment comment = new Comment();
+		comment.setId(UUID.randomUUID().toString());
+		comment.setCommenterName(request.getCommenterName());
+		comment.setContent(request.getContent());
+		comment.setCreatedAt(LocalDateTime.now());
+		
+		post.getComments().add(comment);
+		Post savedPost = postRepository.save(post);
+		return postMapper.toResponseDto(savedPost);
+		}
 
 }
