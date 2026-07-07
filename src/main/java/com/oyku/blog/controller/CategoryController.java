@@ -41,8 +41,6 @@ public class CategoryController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(category);
 	}
 
-	
-	
 	@GetMapping("/{id}")
 	public ResponseEntity<CategoryResponseDto> getCategoryById(@PathVariable Long id) {
 
@@ -50,8 +48,7 @@ public class CategoryController {
 
 		return ResponseEntity.ok(category);
 	}
-	
-	
+
 	@PatchMapping("/{id}")
 	public ResponseEntity<CategoryResponseDto> updatePost(@PathVariable Long id,
 			@Valid @RequestBody UpdateCategoryRequestDto updateCategoryRequestDto) {
@@ -65,10 +62,5 @@ public class CategoryController {
 		categoryService.deleteCategory(id);
 		return ResponseEntity.noContent().build();
 	}
-	
-	
-	
-	
-	
-	
+
 }

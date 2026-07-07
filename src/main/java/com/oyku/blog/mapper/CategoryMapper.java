@@ -17,16 +17,14 @@ import com.oyku.blog.entity.Category;
 
 public interface CategoryMapper {
 
-    @Mapping(target = "id", ignore = true)
+	@Mapping(target = "id", ignore = true)
 	Category toEntity(CreateCategoryRequestDto request);
 
-    CategoryResponseDto toResponseDto(Category category);
+	CategoryResponseDto toResponseDto(Category category);
 
-    List<CategoryResponseDto> toResponseDtoList(List<Category> categories);
-    
-    
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
-    void updateCategoryFromDto(UpdateCategoryRequestDto request,
-                               @MappingTarget Category category);
+	List<CategoryResponseDto> toResponseDtoList(List<Category> categories);
+
+	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+	@Mapping(target = "id", ignore = true)
+	void updateCategoryFromDto(UpdateCategoryRequestDto request, @MappingTarget Category category);
 }

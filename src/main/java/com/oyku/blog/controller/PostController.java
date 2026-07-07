@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
 import com.oyku.blog.dto.request.post.CreatePostRequestDto;
+import com.oyku.blog.dto.request.post.RemoveTagsRequestDto;
 import com.oyku.blog.dto.request.post.SearchPostRequest;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
+import com.oyku.blog.dto.request.post.UpdateTagsRequestDto;
 import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
 import com.oyku.blog.dto.response.statistics.AuthorStatisticsResponseDto;
@@ -61,6 +63,20 @@ public class PostController {
 
 		PostResponseDto updatedPost = postService.updatePost(id, updatePostRequestDto);
 		return ResponseEntity.ok(updatedPost);
+	}
+
+	@PatchMapping("{id}/tags")
+	public ResponseEntity<PostResponseDto> addTags(@PathVariable String id,
+			@Valid @RequestBody UpdateTagsRequestDto request) {
+
+		return ResponseEntity.ok(postService.addTags(id, request));
+	}
+
+	@DeleteMapping("{id}/tags")
+	public ResponseEntity<PostResponseDto> removeTag(@PathVariable String id,
+			@Valid @RequestBody RemoveTagsRequestDto request) {
+
+		return ResponseEntity.ok(postService.removeTag(id, request));
 	}
 
 	@DeleteMapping("/{id}")

@@ -6,8 +6,10 @@ import org.springframework.data.domain.Page;
 
 import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
 import com.oyku.blog.dto.request.post.CreatePostRequestDto;
+import com.oyku.blog.dto.request.post.RemoveTagsRequestDto;
 import com.oyku.blog.dto.request.post.SearchPostRequest;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
+import com.oyku.blog.dto.request.post.UpdateTagsRequestDto;
 import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
 import com.oyku.blog.dto.response.statistics.AuthorStatisticsResponseDto;
@@ -48,4 +50,7 @@ public interface PostService {
 
 	List<PostResponseDto> getLatestPosts(int limit);
 
+	PostResponseDto addTags(String id, UpdateTagsRequestDto request);
+	
+	PostResponseDto removeTag(String id, RemoveTagsRequestDto request);
 }
