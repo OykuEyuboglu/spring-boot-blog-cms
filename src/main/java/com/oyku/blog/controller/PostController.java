@@ -13,6 +13,9 @@ import com.oyku.blog.dto.request.post.SearchPostRequest;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
 import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
+import com.oyku.blog.dto.response.statistics.AuthorStatisticsResponseDto;
+import com.oyku.blog.dto.response.statistics.CategoryStatisticsResponseDto;
+import com.oyku.blog.dto.response.statistics.StatusStatisticsResponseDto;
 import com.oyku.blog.service.PostService;
 
 import jakarta.validation.Valid;
@@ -34,6 +37,14 @@ public class PostController {
 		PostResponseDto createdPost = postService.createPost(createPostRequestDto);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
+	}
+
+	@GetMapping("/all")
+	public ResponseEntity<List<PostResponseDto>> getAllPosts() {
+
+		List<PostResponseDto> posts = postService.getAllPosts();
+
+		return ResponseEntity.ok(posts);
 	}
 
 	@GetMapping("/{id}")
@@ -71,10 +82,11 @@ public class PostController {
 	}
 
 	@GetMapping
-	public ResponseEntity<Page<PostResponseDto>> getPosts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+	public ResponseEntity<Page<PostResponseDto>> getPosts(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
 		return ResponseEntity.ok(postService.getPosts(page, size));
 	}
-	
+
 	@PostMapping("/{id}/comments")
 	public ResponseEntity<String> addComment(@PathVariable String id,
 			@RequestBody @Valid CreateCommentRequestDto request) {
@@ -96,4 +108,29 @@ public class PostController {
 
 		return ResponseEntity.ok(postService.searchPosts(request));
 	}
+
+	@GetMapping("/stats/authors")
+	public ResponseEntity<List<AuthorStatisticsResponseDto>> getAuthorStatistics() {
+
+		return ResponseEntity.ok(postService.getAuthorStatistics());
+	}
+
+	@GetMapping("/stats/status")
+	public ResponseEntity<List<StatusStatisticsResponseDto>> getStatusStatistics() {
+
+		return ResponseEntity.ok(postService.getStatusStatistics());
+	}
+
+	@GetMapping("/stats/categories")
+	public ResponseEntity<List<CategoryStatisticsResponseDto>> getCategoryStatistics() {
+
+		return ResponseEntity.ok(postService.getCategoryStatistics());
+	}
+
+	@GetMapping("/stats/latest")
+	public ResponseEntity<List<PostResponseDto>> getLatestPosts(@RequestParam(defaultValue = "5") int limit) {
+
+		return ResponseEntity.ok(postService.getLatestPosts(limit));
+	}
+
 }
