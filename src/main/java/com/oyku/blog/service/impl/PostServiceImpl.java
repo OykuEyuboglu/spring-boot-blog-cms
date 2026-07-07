@@ -2,6 +2,7 @@ package com.oyku.blog.service.impl;
 
 import com.oyku.blog.mapper.CommentMapperImpl;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,13 +10,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
 import com.oyku.blog.dto.request.post.CreatePostRequestDto;
+import com.oyku.blog.dto.request.post.RemoveTagsRequestDto;
 import com.oyku.blog.dto.request.post.SearchPostRequest;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
+import com.oyku.blog.dto.request.post.UpdateTagsRequestDto;
 import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
 import com.oyku.blog.dto.response.statistics.AuthorStatisticsResponseDto;
@@ -96,12 +100,41 @@ public class PostServiceImpl implements PostService {
 		Post post = findPostbyIdOrThrow(id);
 
 		postMapper.updateEntityFromDto(request, post);
-		
-		  if (request.getTitle() != null && !request.getTitle().isBlank()) {
-		        post.setSlug(slugService.generateSlug(request.getTitle()));
-		    }		
+
+		if (request.getTitle() != null && !request.getTitle().isBlank()) {
+			post.setSlug(slugService.generateSlug(request.getTitle()));
+		}
 		Post updatedPost = postRepository.save(post);
 
+		return postMapper.toResponseDto(updatedPost);
+	}
+
+	@Override
+	@Transactional
+	public PostResponseDto addTags(String id, UpdateTagsRequestDto request) {
+
+		Post post = findPostbyIdOrThrow(id);
+
+		for (String tag : request.getTags()) {
+
+			if (!post.getTags().contains(tag)) {
+
+				post.getTags().add(tag);
+			}
+		}
+
+		Post updatedPost = postRepository.save(post);
+		return postMapper.toResponseDto(updatedPost);
+	}
+
+	@Override
+	@Transactional
+	public PostResponseDto removeTag(String id, RemoveTagsRequestDto request) {
+
+		Post post = findPostbyIdOrThrow(id);
+		post.getTags().removeAll(request.getTags());
+
+		Post updatedPost = postRepository.save(post);
 		return postMapper.toResponseDto(updatedPost);
 	}
 
@@ -204,21 +237,14 @@ public class PostServiceImpl implements PostService {
 
 		return postRepository.getCategoryStatistics();
 	}
-	
+
 	@Override
 	@Transactional(readOnly = true)
 	public List<PostResponseDto> getLatestPosts(int limit) {
 
-		Pageable pageable = PageRequest.of(
-	            0,
-	            limit,
-	            Sort.by(Post::getCreatedAt).descending()
-	    );
-		
-		return postRepository.findAll(pageable)
-				.getContent()
-				.stream()
-				.map(postMapper::toResponseDto)
-				.toList();
+		Pageable pageable = PageRequest.of(0, limit, Sort.by(Post::getCreatedAt).descending());
+
+		return postRepository.findAll(pageable).getContent().stream().map(postMapper::toResponseDto).toList();
 	}
+
 }

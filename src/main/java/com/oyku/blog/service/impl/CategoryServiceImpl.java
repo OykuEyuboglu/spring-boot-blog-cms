@@ -17,74 +17,67 @@ import com.oyku.blog.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 
 @Service
-	@RequiredArgsConstructor
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
-	
 
-	    private final CategoryRepository categoryRepository;
-	    private final CategoryMapper categoryMapper;
+	private final CategoryRepository categoryRepository;
+	private final CategoryMapper categoryMapper;
 
-	    @Override
-	    public CategoryResponseDto createCategory(CreateCategoryRequestDto request) {
+	@Override
+	public CategoryResponseDto createCategory(CreateCategoryRequestDto request) {
 
-	        Category category = categoryMapper.toEntity(request);
+		Category category = categoryMapper.toEntity(request);
 
-	        category = categoryRepository.save(category);
+		category = categoryRepository.save(category);
 
-	        return categoryMapper.toResponseDto(category);
-	    }
+		return categoryMapper.toResponseDto(category);
+	}
 
-	    @Override
-	    public List<CategoryResponseDto> getAllCategories() {
+	@Override
+	public List<CategoryResponseDto> getAllCategories() {
 
-	        List<Category> categories = categoryRepository.findAll();
+		List<Category> categories = categoryRepository.findAll();
 
-	        return categoryMapper.toResponseDtoList(categories);
-	    }
-	    
-	    
-	    @Override
-		@Transactional(readOnly = true)
-		public CategoryResponseDto getCategoryById(Long id) {
+		return categoryMapper.toResponseDtoList(categories);
+	}
 
-			Category category = findCategorybyIdOrThrow(id);
+	@Override
+	@Transactional(readOnly = true)
+	public CategoryResponseDto getCategoryById(Long id) {
 
-			return categoryMapper.toResponseDto(category);
-		}
-	    
-	    
-	    
-	    @Override
-		@Transactional
-		public CategoryResponseDto updateCategory(Long id, UpdateCategoryRequestDto request) {
+		Category category = findCategorybyIdOrThrow(id);
 
-			Category category = findCategorybyIdOrThrow(id);
-			
-			categoryMapper.updateCategoryFromDto(request, category);
-				
-			Category updatedCategory = categoryRepository.save(category);
+		return categoryMapper.toResponseDto(category);
+	}
 
-			return categoryMapper.toResponseDto(updatedCategory);
-		}
+	@Override
+	@Transactional
+	public CategoryResponseDto updateCategory(Long id, UpdateCategoryRequestDto request) {
 
-	    
-	    
-		@Override
-		@Transactional
-		public void deleteCategory(Long id) {
+		Category category = findCategorybyIdOrThrow(id);
 
-			Category category = findCategorybyIdOrThrow(id);
+		categoryMapper.updateCategoryFromDto(request, category);
 
-			categoryRepository.delete(category);
-		}
+		Category updatedCategory = categoryRepository.save(category);
 
-	    
-		@Override
-		@Transactional
-		public Category findCategorybyIdOrThrow(Long id) {
+		return categoryMapper.toResponseDto(updatedCategory);
+	}
 
-			return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category does not exist."));
-		}
-	    
-	
+	@Override
+	@Transactional
+	public void deleteCategory(Long id) {
+
+		Category category = findCategorybyIdOrThrow(id);
+
+		categoryRepository.delete(category);
+	}
+
+	@Override
+	@Transactional
+	public Category findCategorybyIdOrThrow(Long id) {
+
+		return categoryRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Category does not exist."));
+	}
+
 }
