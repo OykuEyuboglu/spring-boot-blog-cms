@@ -19,6 +19,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -32,63 +33,66 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "posts")
+@Table(name = "posts", indexes = { @Index(name = "idx_post_slug", columnList = "slug"),
+		@Index(name = "idx_post_status", columnList = "status"),
+		@Index(name = "idx_post_title", columnList = "title"), }
+
+)
 public class Post {
-	
+
 	@Id
 	@Column(name = "id", nullable = false, updatable = false, unique = true)
-    private String id = UUID.randomUUID().toString();
-	
+	private String id = UUID.randomUUID().toString();
+
+	@Column(nullable = false, unique = true, length = 200)
+	private String slug;
+
 	@Column(name = "title", nullable = false)
 	private String title;
-	
+
 	@Column(name = "summary", nullable = false)
 	private String summary;
-	
+
 	@Column(name = "content", nullable = false, columnDefinition = "TEXT")
 	private String content;
-	
+
 	@Column(name = "author_name", nullable = false)
 	private String authorName;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "post_tags",
-            joinColumns = @JoinColumn(name = "post_id")
-    )
-    @Column(name = "tag", nullable = false)
-    private List<String> tags = new ArrayList<>();
+	@ElementCollection
+	@CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
+	@Column(name = "tag", nullable = false)
+	private List<String> tags = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private PostStatus status = PostStatus.DRAFT;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status", nullable = false)
+	private PostStatus status = PostStatus.DRAFT;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "category_id", nullable = false)
 	private Category category;
-	
-	
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "comments", columnDefinition = "jsonb", nullable = true)
-    private List<Comment> comments = new ArrayList<>();
 
-    @Column(name = "created_at", updatable = false)
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(name = "comments", columnDefinition = "jsonb", nullable = true)
+	private List<Comment> comments = new ArrayList<>();
+
+	@Column(name = "created_at", updatable = false)
 	private LocalDateTime createdAt;
 
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
-	
+
 	@PrePersist
 	protected void onCreate() {
-		
+
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
-	
+
 		if (this.status == null) {
 			this.status = PostStatus.DRAFT;
 		}
 	}
-	
+
 	@PreUpdate
 	protected void onUpdate() {
 		this.updatedAt = LocalDateTime.now();
