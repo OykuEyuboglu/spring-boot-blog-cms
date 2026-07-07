@@ -42,6 +42,7 @@ public class PostServiceImpl implements PostService {
 	private final PostRepository postRepository;
 	private final CategoryRepository categoryRepository;
 	private final PostMapper postMapper;
+	private final SlugService slugService;
 
 	@Override
 	@Transactional
@@ -54,6 +55,8 @@ public class PostServiceImpl implements PostService {
 
 		post.setCategory(category);
 		post.setStatus(PostStatus.DRAFT);
+
+		post.setSlug(slugService.generateSlug(post.getTitle()));
 
 		Post savedPost = postRepository.save(post);
 		return postMapper.toResponseDto(savedPost);

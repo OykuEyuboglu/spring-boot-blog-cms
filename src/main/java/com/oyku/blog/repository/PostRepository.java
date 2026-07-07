@@ -46,6 +46,7 @@ public interface PostRepository extends JpaRepository<Post, String>, JpaSpecific
 			""")
 	List<CategoryStatisticsResponseDto> getCategoryStatistics();
 
+	boolean existsBySlug(String slug);
 	
 
 }
