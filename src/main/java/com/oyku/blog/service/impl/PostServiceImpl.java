@@ -18,6 +18,9 @@ import com.oyku.blog.dto.request.post.SearchPostRequest;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
 import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
+import com.oyku.blog.dto.response.statistics.AuthorStatisticsResponseDto;
+import com.oyku.blog.dto.response.statistics.CategoryStatisticsResponseDto;
+import com.oyku.blog.dto.response.statistics.StatusStatisticsResponseDto;
 import com.oyku.blog.entity.Category;
 import com.oyku.blog.entity.Post;
 import com.oyku.blog.enums.PostStatus;
@@ -54,6 +57,15 @@ public class PostServiceImpl implements PostService {
 
 		Post savedPost = postRepository.save(post);
 		return postMapper.toResponseDto(savedPost);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<PostResponseDto> getAllPosts() {
+
+		List<Post> posts = postRepository.findAll();
+
+		return postMapper.toResponseDtoList(posts);
 	}
 
 	@Override
@@ -166,4 +178,41 @@ public class PostServiceImpl implements PostService {
 		return postMapper.toResponseDto(savedPost);
 	}
 
+	@Override
+	@Transactional
+	public List<StatusStatisticsResponseDto> getStatusStatistics() {
+
+		return postRepository.getStatusStatistics();
+	}
+
+	@Override
+	@Transactional
+	public List<AuthorStatisticsResponseDto> getAuthorStatistics() {
+
+		return postRepository.getAuthorStatistics();
+	}
+
+	@Override
+	@Transactional
+	public List<CategoryStatisticsResponseDto> getCategoryStatistics() {
+
+		return postRepository.getCategoryStatistics();
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<PostResponseDto> getLatestPosts(int limit) {
+
+		Pageable pageable = PageRequest.of(
+	            0,
+	            limit,
+	            Sort.by("createdAt").descending()
+	    );
+		
+		return postRepository.findAll(pageable)
+				.getContent()
+				.stream()
+				.map(postMapper::toResponseDto)
+				.toList();
+	}
 }
