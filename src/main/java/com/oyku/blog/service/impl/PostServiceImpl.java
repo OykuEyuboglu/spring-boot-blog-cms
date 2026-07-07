@@ -96,7 +96,10 @@ public class PostServiceImpl implements PostService {
 		Post post = findPostbyIdOrThrow(id);
 
 		postMapper.updateEntityFromDto(request, post);
-
+		
+		  if (request.getTitle() != null && !request.getTitle().isBlank()) {
+		        post.setSlug(slugService.generateSlug(request.getTitle()));
+		    }		
 		Post updatedPost = postRepository.save(post);
 
 		return postMapper.toResponseDto(updatedPost);
@@ -146,7 +149,7 @@ public class PostServiceImpl implements PostService {
 	@Transactional
 	public Page<PostResponseDto> getPosts(int page, int size) {
 
-		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Post::getCreatedAt).descending());
 
 		Page<Post> postsPage = postRepository.findAll(pageable);
 
@@ -209,7 +212,7 @@ public class PostServiceImpl implements PostService {
 		Pageable pageable = PageRequest.of(
 	            0,
 	            limit,
-	            Sort.by("createdAt").descending()
+	            Sort.by(Post::getCreatedAt).descending()
 	    );
 		
 		return postRepository.findAll(pageable)
