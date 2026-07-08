@@ -2,7 +2,6 @@ package com.oyku.blog.service.impl;
 
 import com.oyku.blog.mapper.CommentMapperImpl;
 import java.time.LocalDateTime;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

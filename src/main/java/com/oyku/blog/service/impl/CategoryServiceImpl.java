@@ -24,6 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
 	private final CategoryMapper categoryMapper;
 
 	@Override
+	@Transactional
 	public CategoryResponseDto createCategory(CreateCategoryRequestDto request) {
 
 		Category category = categoryMapper.toEntity(request);
@@ -34,6 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
 	}
 
 	@Override
+	@Transactional
 	public List<CategoryResponseDto> getAllCategories() {
 
 		List<Category> categories = categoryRepository.findAll();
