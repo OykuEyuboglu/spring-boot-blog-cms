@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -57,9 +58,9 @@ class CategoryServiceImplTest {
 
 		verify(categoryMapper).toEntity(request);
 		verify(categoryMapper).toResponseDto(category);
-		
+
 		assertEquals(response.getName(), result.getName());
-		}
+	}
 
 	@Test
 	void shouldReturnCategoryByIdSuccessfully() {
@@ -97,6 +98,23 @@ class CategoryServiceImplTest {
 	}
 
 	@Test
+	void shouldReturnAllCategorySuccessfully() {
+		Category category = createCategory();
+		CategoryResponseDto response = createResponse();
+
+		when(categoryRepository.findAll()).thenReturn(List.of(category));
+		when(categoryMapper.toResponseDtoList(List.of(category))).thenReturn(List.of(response));
+
+		List<CategoryResponseDto> result = categoryService.getAllCategories();
+
+		assertEquals(1, result.size());
+		assertEquals(response.getName(), result.get(0).getName());
+
+		verify(categoryRepository).findAll();
+		verify(categoryMapper).toResponseDtoList(List.of(category));
+	}
+
+	@Test
 	void shouldUpdateCategorySuccessfully() {
 
 		Long categoryId = 1L;
@@ -116,7 +134,7 @@ class CategoryServiceImplTest {
 		when(categoryMapper.toResponseDto(category)).thenReturn(response);
 
 		CategoryResponseDto result = categoryService.updateCategory(categoryId, request);
-
+  
 		assertNotNull(result);
 		assertEquals(response.getName(), result.getName());
 
@@ -177,11 +195,6 @@ class CategoryServiceImplTest {
 		verify(categoryRepository).findById(categoryId);
 		verify(categoryMapper, never()).updateCategoryFromDto(any(), any());
 		verify(categoryRepository, never()).save(any(Category.class));
-	}
-	
-	@Test
-	void shouldReturnAllCategorySuccessfully(){
-		
 	}
 
 	private CreateCategoryRequestDto createRequest() {

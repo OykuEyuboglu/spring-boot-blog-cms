@@ -1,6 +1,5 @@
 package com.oyku.blog.service.impl;
 
-import com.oyku.blog.mapper.CommentMapperImpl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +26,7 @@ import com.oyku.blog.entity.Category;
 import com.oyku.blog.entity.Post;
 import com.oyku.blog.enums.PostStatus;
 import com.oyku.blog.exception.ResourceNotFoundException;
+import com.oyku.blog.mapper.CommentMapperImpl;
 import com.oyku.blog.mapper.PostMapper;
 import com.oyku.blog.model.Comment;
 import com.oyku.blog.repository.CategoryRepository;
