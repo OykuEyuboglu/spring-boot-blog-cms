@@ -123,8 +123,7 @@ Users can:
 
 ### Swagger Endpoint List
 
-<img src="images/swagger-home.png" width="400"/>
-
+<img src="images/swagger-home.png" width="40%" alt="Swagger UI Preview"/>
 ---
 
 # 🛠 Technology Stack
@@ -267,7 +266,7 @@ Response DTO
 ## Statistics
 
 | Method | Endpoint               | Description                     |
-| ------ | ---------------------- | -------------------------------
+| ------ | ---------------------- | ------------------------------- |
 | GET    | /statistics/status     | Retrieve post status statistics |
 | GET    | /statistics/authors    | Retrieve author statistics      |
 | GET    | /statistics/categories | Retrieve category statistics    |
