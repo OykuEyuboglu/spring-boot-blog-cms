@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
@@ -20,6 +21,7 @@ import com.oyku.blog.dto.response.statistics.CategoryStatisticsResponseDto;
 import com.oyku.blog.dto.response.statistics.StatusStatisticsResponseDto;
 import com.oyku.blog.service.PostService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class PostController {
@@ -34,6 +37,7 @@ public class PostController {
 	private final PostService postService;
 
 	@PostMapping
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	public ResponseEntity<PostResponseDto> createPost(@Valid @RequestBody CreatePostRequestDto createPostRequestDto) {
 
 		PostResponseDto createdPost = postService.createPost(createPostRequestDto);
@@ -58,14 +62,16 @@ public class PostController {
 	}
 
 	@PatchMapping("/{id}")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	public ResponseEntity<PostResponseDto> updatePost(@PathVariable String id,
 			@Valid @RequestBody UpdatePostRequestDto updatePostRequestDto) {
-
+		
 		PostResponseDto updatedPost = postService.updatePost(id, updatePostRequestDto);
 		return ResponseEntity.ok(updatedPost);
 	}
 
 	@PatchMapping("{id}/tags")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	public ResponseEntity<PostResponseDto> addTags(@PathVariable String id,
 			@Valid @RequestBody UpdateTagsRequestDto request) {
 
@@ -73,6 +79,7 @@ public class PostController {
 	}
 
 	@DeleteMapping("{id}/tags")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	public ResponseEntity<PostResponseDto> removeTag(@PathVariable String id,
 			@Valid @RequestBody RemoveTagsRequestDto request) {
 
@@ -80,18 +87,21 @@ public class PostController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	public ResponseEntity<Void> deletePost(@PathVariable String id) {
 		postService.deletePost(id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PatchMapping("/{id}/publish")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	public ResponseEntity<PostResponseDto> publishPost(@PathVariable String id) {
 		PostResponseDto publishedPost = postService.publishPost(id);
 		return ResponseEntity.ok(publishedPost);
 	}
 
 	@PatchMapping("/{id}/draft")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	public ResponseEntity<PostResponseDto> draftPost(@PathVariable String id) {
 		PostResponseDto draftedPost = postService.publishPost(id);
 		return ResponseEntity.ok(draftedPost);
@@ -104,6 +114,7 @@ public class PostController {
 	}
 
 	@PostMapping("/{id}/comments")
+	@PreAuthorize("hasAnyRole('USER','ADMIN')")
 	public ResponseEntity<String> addComment(@PathVariable String id,
 			@RequestBody @Valid CreateCommentRequestDto request) {
 
@@ -126,18 +137,21 @@ public class PostController {
 	}
 
 	@GetMapping("/stats/authors")
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<List<AuthorStatisticsResponseDto>> getAuthorStatistics() {
 
 		return ResponseEntity.ok(postService.getAuthorStatistics());
 	}
 
 	@GetMapping("/stats/status")
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<List<StatusStatisticsResponseDto>> getStatusStatistics() {
 
 		return ResponseEntity.ok(postService.getStatusStatistics());
 	}
 
 	@GetMapping("/stats/categories")
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<List<CategoryStatisticsResponseDto>> getCategoryStatistics() {
 
 		return ResponseEntity.ok(postService.getCategoryStatistics());

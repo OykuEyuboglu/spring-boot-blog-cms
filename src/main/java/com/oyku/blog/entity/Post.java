@@ -59,6 +59,10 @@ public class Post {
 	@Column(name = "author_name", nullable = false)
 	private String authorName;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
+	
 	@ElementCollection
 	@CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
 	@Column(name = "tag", nullable = false)

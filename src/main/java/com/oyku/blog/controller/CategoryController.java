@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,11 +19,13 @@ import com.oyku.blog.dto.request.category.UpdateCategoryRequestDto;
 import com.oyku.blog.dto.response.category.CategoryResponseDto;
 import com.oyku.blog.service.CategoryService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/categories")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class CategoryController {
 
@@ -33,6 +36,7 @@ public class CategoryController {
 		return ResponseEntity.ok(categoryService.getAllCategories());
 	}
 
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping
 	public ResponseEntity<CategoryResponseDto> createCategory(@Valid @RequestBody CreateCategoryRequestDto request) {
 
@@ -50,7 +54,8 @@ public class CategoryController {
 	}
 
 	@PatchMapping("/{id}")
-	public ResponseEntity<CategoryResponseDto> updatePost(@PathVariable Long id,
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<CategoryResponseDto> updateCategory(@PathVariable Long id,
 			@Valid @RequestBody UpdateCategoryRequestDto updateCategoryRequestDto) {
 
 		CategoryResponseDto updatedCategory = categoryService.updateCategory(id, updateCategoryRequestDto);
@@ -58,7 +63,8 @@ public class CategoryController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
 		categoryService.deleteCategory(id);
 		return ResponseEntity.noContent().build();
 	}

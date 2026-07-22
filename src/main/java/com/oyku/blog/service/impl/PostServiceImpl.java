@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +26,17 @@ import com.oyku.blog.dto.response.statistics.CategoryStatisticsResponseDto;
 import com.oyku.blog.dto.response.statistics.StatusStatisticsResponseDto;
 import com.oyku.blog.entity.Category;
 import com.oyku.blog.entity.Post;
+import com.oyku.blog.entity.User;
 import com.oyku.blog.enums.PostStatus;
+import com.oyku.blog.enums.Role;
+import com.oyku.blog.exception.ForbiddenException;
 import com.oyku.blog.exception.ResourceNotFoundException;
 import com.oyku.blog.mapper.CommentMapperImpl;
 import com.oyku.blog.mapper.PostMapper;
 import com.oyku.blog.model.Comment;
 import com.oyku.blog.repository.CategoryRepository;
 import com.oyku.blog.repository.PostRepository;
+import com.oyku.blog.repository.UserRepository;
 import com.oyku.blog.service.PostService;
 import com.oyku.blog.specification.PostSpecification;
 
@@ -43,6 +49,7 @@ public class PostServiceImpl implements PostService {
 	private final CommentMapperImpl commentMapperImpl;
 	private final PostRepository postRepository;
 	private final CategoryRepository categoryRepository;
+	private final UserRepository userRepository;
 	private final PostMapper postMapper;
 	private final SlugService slugService;
 
@@ -59,6 +66,9 @@ public class PostServiceImpl implements PostService {
 		post.setStatus(PostStatus.DRAFT);
 
 		post.setSlug(slugService.generateSlug(post.getTitle()));
+
+		User currentUser = getCurrentUser();
+		post.setUser(currentUser);
 
 		Post savedPost = postRepository.save(post);
 		return postMapper.toResponseDto(savedPost);
@@ -94,8 +104,10 @@ public class PostServiceImpl implements PostService {
 	@Override
 	@Transactional
 	public PostResponseDto updatePost(String id, UpdatePostRequestDto request) {
+				Post post = findPostbyIdOrThrow(id);
 
-		Post post = findPostbyIdOrThrow(id);
+	validatePostOwner(post);
+		
 
 		postMapper.updateEntityFromDto(request, post);
 
@@ -113,6 +125,8 @@ public class PostServiceImpl implements PostService {
 
 		Post post = findPostbyIdOrThrow(id);
 
+		validatePostOwner(post);
+		
 		for (String tag : request.getTags()) {
 
 			if (!post.getTags().contains(tag)) {
@@ -130,6 +144,9 @@ public class PostServiceImpl implements PostService {
 	public PostResponseDto removeTag(String id, RemoveTagsRequestDto request) {
 
 		Post post = findPostbyIdOrThrow(id);
+
+		validatePostOwner(post);
+		
 		post.getTags().removeAll(request.getTags());
 
 		Post updatedPost = postRepository.save(post);
@@ -141,7 +158,8 @@ public class PostServiceImpl implements PostService {
 	public void deletePost(String id) {
 
 		Post post = findPostbyIdOrThrow(id);
-
+		validatePostOwner(post);
+		
 		postRepository.delete(post);
 	}
 
@@ -151,6 +169,8 @@ public class PostServiceImpl implements PostService {
 
 		Post post = findPostbyIdOrThrow(id);
 
+		validatePostOwner(post);
+		
 		post.setStatus(PostStatus.PUBLISHED);
 
 		Post publishedPost = postRepository.save(post);
@@ -163,6 +183,8 @@ public class PostServiceImpl implements PostService {
 
 		Post post = findPostbyIdOrThrow(id);
 
+		validatePostOwner(post);
+		
 		post.setStatus(PostStatus.DRAFT);
 
 		Post draftPost = postRepository.save(post);
@@ -245,4 +267,20 @@ public class PostServiceImpl implements PostService {
 		return postRepository.findAll(pageable).getContent().stream().map(postMapper::toResponseDto).toList();
 	}
 
+	private User getCurrentUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String email = authentication.getName();
+
+		return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+	}
+	
+	private void validatePostOwner(Post post) {
+		User currentUser = getCurrentUser();
+			
+			if (!post.getUser().getId().equals(currentUser.getId())
+			        && !currentUser.getRole().equals(Role.ADMIN)) {
+			    throw new ForbiddenException("You are not allowed to modify this post.");
+			}
+		}
+		
 }
