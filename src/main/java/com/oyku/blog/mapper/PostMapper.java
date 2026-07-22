@@ -24,6 +24,8 @@ public interface PostMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "category", ignore = true)
+	@Mapping(target = "user", ignore = true)
+	@Mapping(target = "slug", ignore = true)
     Post toEntity(CreatePostRequestDto createPostRequestDto);
 
     @Mapping(target = "tags", expression = "java(copyTags(post.getTags()))")

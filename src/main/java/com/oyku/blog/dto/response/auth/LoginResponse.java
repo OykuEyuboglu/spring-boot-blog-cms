@@ -1,5 +1,9 @@
 package com.oyku.blog.dto.response.auth;
 
+import java.util.Set;
+
+import com.oyku.blog.enums.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +19,7 @@ public class LoginResponse {
 
 	private String token;
 	private String type;
+	private Set<Role> role;
 	private String name;
 	private String email;
 	

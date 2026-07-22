@@ -1,9 +1,19 @@
 package com.oyku.blog.entity;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
+import com.oyku.blog.enums.Role;
+
+import java.util.HashSet;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -54,4 +64,11 @@ public class User {
 	protected void onUpdate() {
 		this.updatedAt = LocalDateTime.now();
 	}
+	
+	@Builder.Default
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Enumerated(EnumType.STRING)
+	@CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+	@Column(name = "role")
+	private Set<Role> role = new HashSet<>();
 }

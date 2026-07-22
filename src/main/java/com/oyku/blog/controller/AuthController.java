@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class UserController {
+public class AuthController {
 
 	private final AuthService authService;
 	private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
