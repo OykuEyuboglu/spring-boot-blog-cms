@@ -681,7 +681,7 @@ jwt.expiration=your_expiration_time
 
 ---
 
-🐳 Running Infrastructure Services (Docker Services)
+# 🐳 Running Infrastructure Services (Docker Services)
 
 The project uses Docker to run Redis and RabbitMQ services required for caching, rate limiting, and asynchronous messaging.
 
