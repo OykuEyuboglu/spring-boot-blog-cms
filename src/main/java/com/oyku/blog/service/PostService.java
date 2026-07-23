@@ -10,6 +10,7 @@ import com.oyku.blog.dto.request.post.RemoveTagsRequestDto;
 import com.oyku.blog.dto.request.post.SearchPostRequest;
 import com.oyku.blog.dto.request.post.UpdatePostRequestDto;
 import com.oyku.blog.dto.request.post.UpdateTagsRequestDto;
+import com.oyku.blog.dto.response.PageResponse;
 import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
 import com.oyku.blog.dto.response.statistics.AuthorStatisticsResponseDto;
@@ -40,7 +41,7 @@ public interface PostService {
 	
 	List<PostResponseDto> searchPosts(SearchPostRequest request);
 	
-	Page<PostResponseDto> getPosts(int page, int size);
+	PageResponse<PostResponseDto> getPosts(int page, int size);
 
 	List<StatusStatisticsResponseDto> getStatusStatistics();
 	
