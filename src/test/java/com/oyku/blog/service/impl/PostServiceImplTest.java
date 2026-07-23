@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -173,17 +172,15 @@ class PostServiceImplTest {
 		Post post = createPost();
 		PostResponseDto response = createResponse();
 
-		String postId = "1";
-
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 		when(postMapper.toResponseDto(post)).thenReturn(response);
 
-		PostResponseDto result = postService.getPostById(postId);
+		PostResponseDto result = postService.getPostById(POST_ID);
 
 		assertNotNull(result);
 		assertEquals(response.getTitle(), result.getTitle());
 
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postMapper).toResponseDto(post);
 	}
 
@@ -206,16 +203,15 @@ class PostServiceImplTest {
 
 	@Test
 	void shouldThrowExceptionWhenPostNotFound() {
-		String postId = "1";
 
-		when(postRepository.findById(postId)).thenReturn(Optional.empty());
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.empty());
 
 		ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-				() -> postService.getPostById(postId));
+				() -> postService.getPostById(POST_ID));
 
 		assertEquals("Post does not exist.", exception.getMessage());
 
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postMapper, never()).toResponseDto(any());
 	}
 
@@ -223,8 +219,6 @@ class PostServiceImplTest {
 	void shouldUpdatePostSuccessfully() {
 
 		mockAuthentication();
-
-		String postId = "1";
 
 		UpdatePostRequestDto request = new UpdatePostRequestDto();
 
@@ -235,7 +229,7 @@ class PostServiceImplTest {
 		response.setTitle("New Title");
 		response.setSlug("new-title");
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 
 		when(slugService.generateSlug(request.getTitle())).thenReturn(response.getSlug());
 
@@ -243,13 +237,13 @@ class PostServiceImplTest {
 
 		when(postMapper.toResponseDto(post)).thenReturn(response);
 
-		PostResponseDto result = postService.updatePost(postId, request);
+		PostResponseDto result = postService.updatePost(POST_ID, request);
 
 		assertNotNull(result);
 		assertEquals(response.getTitle(), result.getTitle());
 		assertEquals(response.getSlug(), post.getSlug());
 
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 
 		verify(postMapper).updateEntityFromDto(request, post);
 
@@ -262,19 +256,18 @@ class PostServiceImplTest {
 	@Test
 	void shouldThrowExceptionWhenUpdatingNonExistingPost() {
 
-		String postId = "1";
 		UpdatePostRequestDto request = new UpdatePostRequestDto();
 
 		request.setTitle("New Title");
 
-		when(postRepository.findById(postId)).thenReturn(Optional.empty());
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.empty());
 
 		ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-				() -> postService.updatePost(postId, request));
+				() -> postService.updatePost(POST_ID, request));
 
 		assertEquals("Post does not exist.", exception.getMessage());
 
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postMapper, never()).updateEntityFromDto(any(), any());
 		verify(postRepository, never()).save(any(Post.class));
 	}
@@ -284,7 +277,6 @@ class PostServiceImplTest {
 		
 		mockAuthentication();
 
-		String postId = "1";
 		UpdatePostRequestDto request = new UpdatePostRequestDto();
 
 		request.setTitle("");
@@ -292,11 +284,11 @@ class PostServiceImplTest {
 		Post post = createPost();
 		PostResponseDto response = createResponse();
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
 		when(postMapper.toResponseDto(post)).thenReturn(response);
 
-		PostResponseDto result = postService.updatePost(postId, request);
+		PostResponseDto result = postService.updatePost(POST_ID, request);
 
 		assertNotNull(result);
 
@@ -308,7 +300,6 @@ class PostServiceImplTest {
 		
 		mockAuthentication();
 
-		String postId = "1";
 		UpdatePostRequestDto request = new UpdatePostRequestDto();
 
 		request.setTitle(null);
@@ -316,11 +307,11 @@ class PostServiceImplTest {
 		Post post = createPost();
 		PostResponseDto response = createResponse();
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
 		when(postMapper.toResponseDto(post)).thenReturn(response);
 
-		PostResponseDto result = postService.updatePost(postId, request);
+		PostResponseDto result = postService.updatePost(POST_ID, request);
 
 		assertNotNull(result);
 
@@ -332,30 +323,27 @@ class PostServiceImplTest {
 
 		mockAuthentication();
 
-		String postId = "1";
 		Post post = createPost();
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 
-		postService.deletePost(postId);
+		postService.deletePost(POST_ID);
 
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postRepository).delete(post);
 	}
 
 	@Test
 	void shouldThrowExceptionWhenDeletingNonExistingPost() {
 
-		String postId = "1";
-
-		when(postRepository.findById(postId)).thenReturn(Optional.empty());
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.empty());
 
 		ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-				() -> postService.deletePost(postId));
+				() -> postService.deletePost(POST_ID));
 
 		assertEquals("Post does not exist.", exception.getMessage());
 
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postMapper, never()).updateEntityFromDto(any(), any());
 		verify(postRepository, never()).save(any(Post.class));
 	}
@@ -365,18 +353,17 @@ class PostServiceImplTest {
 
 		mockAuthentication();
 
-		String postId = "1";
 		Post post = createPost();
 		post.setStatus(PostStatus.PUBLISHED);
 		PostResponseDto response = createResponse();
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
 		when(postMapper.toResponseDto(post)).thenReturn(response);
 
-		PostResponseDto result = postService.draftPost(postId);
+		PostResponseDto result = postService.draftPost(POST_ID);
 
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postMapper).toResponseDto(post);
 		verify(postRepository).save(post);
 
@@ -387,17 +374,15 @@ class PostServiceImplTest {
 	@Test
 	void shouldThrowExceptionWhenDraftingNonExistingPost() {
 
-		String postId = "1";
-
-		when(postRepository.findById(postId)).thenReturn(Optional.empty());
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.empty());
 
 		ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-				() -> postService.draftPost(postId));
+				() -> postService.draftPost(POST_ID));
 
 		assertEquals("Post does not exist.", exception.getMessage());
 
 		verify(postMapper, never()).toResponseDto(any());
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postRepository, never()).save(any(Post.class));
 	}
 
@@ -406,17 +391,16 @@ class PostServiceImplTest {
 		
 		mockAuthentication();
 
-		String postId = "1";
 		Post post = createPost();
 		PostResponseDto response = createResponse();
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
 		when(postMapper.toResponseDto(post)).thenReturn(response);
 
-		PostResponseDto result = postService.publishPost(postId);
+		PostResponseDto result = postService.publishPost(POST_ID);
 
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postMapper).toResponseDto(post);
 		verify(postRepository).save(post);
 
@@ -427,24 +411,21 @@ class PostServiceImplTest {
 	@Test
 	void shouldThrowExceptionWhenPublishingNonExistingPost() {
 
-		String postId = "1";
-
-		when(postRepository.findById(postId)).thenReturn(Optional.empty());
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.empty());
 
 		ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-				() -> postService.publishPost(postId));
+				() -> postService.publishPost(POST_ID));
 
 		assertEquals("Post does not exist.", exception.getMessage());
 
 		verify(postMapper, never()).toResponseDto(any());
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postRepository, never()).save(any(Post.class));
 	}
 
 	@Test
 	void shouldReturnCommentsByPostIdSuccessfully() {
 
-		String postId = "1";
 		Post post = createPost();
 
 		Comment comment = new Comment();
@@ -452,11 +433,11 @@ class PostServiceImplTest {
 
 		CommentResponseDto response = new CommentResponseDto();
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 
 		when(commentMapperImpl.toResponseDtos(post.getComments())).thenReturn(List.of(response));
 
-		List<CommentResponseDto> result = postService.getCommentsByPostId(postId);
+		List<CommentResponseDto> result = postService.getCommentsByPostId(POST_ID);
 		assertEquals(1, result.size());
 
 		verify(commentMapperImpl).toResponseDtos(post.getComments());
@@ -475,8 +456,6 @@ class PostServiceImplTest {
 	@Test
 	void shouldAddCommentSuccessfully() {
 
-		String postId = "1";
-
 		CreateCommentRequestDto request = new CreateCommentRequestDto();
 
 		request.setCommenterName("Commenter Name");
@@ -485,11 +464,11 @@ class PostServiceImplTest {
 		Post post = createPost();
 		PostResponseDto response = createResponse();
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
 		when(postMapper.toResponseDto(post)).thenReturn(response);
 
-		PostResponseDto result = postService.addComment(postId, request);
+		PostResponseDto result = postService.addComment(POST_ID, request);
 
 		assertNotNull(result);
 		assertEquals(1, post.getComments().size());
@@ -504,8 +483,6 @@ class PostServiceImplTest {
 	void shouldAddTagsSuccessfully() {
 		
 		mockAuthentication();
-		
-		String postId = "1";
 
 		UpdateTagsRequestDto request = new UpdateTagsRequestDto();
 
@@ -514,11 +491,11 @@ class PostServiceImplTest {
 		Post post = createPost();
 		PostResponseDto response = createResponse();
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
 		when(postMapper.toResponseDto(post)).thenReturn(response);
 
-		PostResponseDto result = postService.addTags(postId, request);
+		PostResponseDto result = postService.addTags(POST_ID, request);
 
 		assertNotNull(result);
 		assertEquals(1, post.getTags().size());
@@ -526,21 +503,19 @@ class PostServiceImplTest {
 		assertTrue(post.getTags().contains("tag1"));
 
 		verify(postRepository).save(post);
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postMapper).toResponseDto(post);
 	}
 
 	@Test
 	void shouldThrowExceptionWhenAddingTagToNonExistingPost() {
 
-		String postId = "1";
-
 		UpdateTagsRequestDto request = new UpdateTagsRequestDto();
 		request.setTags(List.of("tag1"));
 
-		when(postRepository.findById(postId)).thenReturn(Optional.empty());
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.empty());
 
-		assertThrows(ResourceNotFoundException.class, () -> postService.addTags(postId, request));
+		assertThrows(ResourceNotFoundException.class, () -> postService.addTags(POST_ID, request));
 
 	}
 
@@ -548,8 +523,6 @@ class PostServiceImplTest {
 	void shouldNotAddDuplicateTag() {
 
 		mockAuthentication();
-
-		String postId = "1";
 
 		Post post = createPost();
 		post.setTags(new ArrayList<>(List.of("tag1")));
@@ -559,17 +532,17 @@ class PostServiceImplTest {
 		UpdateTagsRequestDto request = new UpdateTagsRequestDto();
 		request.setTags(List.of("tag1"));
 
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
 		when(postMapper.toResponseDto(post)).thenReturn(response);
 
-		PostResponseDto result = postService.addTags(postId, request);
+		PostResponseDto result = postService.addTags(POST_ID, request);
 
 		assertNotNull(result);
 		assertEquals(1, post.getTags().size());
 		assertTrue(post.getTags().contains("tag1"));
 
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postRepository).save(post);
 		verify(postMapper).toResponseDto(post);
 	}
@@ -579,7 +552,6 @@ class PostServiceImplTest {
 
 		mockAuthentication();
 
-		String postId = "1";
 		Post post = createPost();
 
 		RemoveTagsRequestDto request = new RemoveTagsRequestDto();
@@ -591,17 +563,17 @@ class PostServiceImplTest {
 		PostResponseDto response = createResponse();
 
 		when(postMapper.toResponseDto(post)).thenReturn(response);
-		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.of(post));
 		when(postRepository.save(post)).thenReturn(post);
 
-		PostResponseDto result = postService.removeTag(postId, request);
+		PostResponseDto result = postService.removeTag(POST_ID, request);
 
 		assertNotNull(result);
 		assertFalse(post.getTags().contains("tag1"));
 		assertEquals(1, post.getTags().size());
 
 		verify(postRepository).save(post);
-		verify(postRepository).findById(postId);
+		verify(postRepository).findById(POST_ID);
 		verify(postMapper).toResponseDto(post);
 
 	}
