@@ -2,6 +2,9 @@ package com.oyku.blog.service.impl;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	@Transactional
+	@CacheEvict(value = "categories", allEntries = true)
 	public CategoryResponseDto createCategory(CreateCategoryRequestDto request) {
 
 		Category category = categoryMapper.toEntity(request);
@@ -36,6 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	@Transactional
+	@Cacheable("categories")
 	public List<CategoryResponseDto> getAllCategories() {
 
 		List<Category> categories = categoryRepository.findAll();
@@ -45,6 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	@Transactional(readOnly = true)
+	@Cacheable(value = "category", key = "#id")
 	public CategoryResponseDto getCategoryById(Long id) {
 
 		Category category = findCategorybyIdOrThrow(id);
@@ -54,6 +60,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	@Transactional
+	@CachePut(value = "category", key = "#id")
 	public CategoryResponseDto updateCategory(Long id, UpdateCategoryRequestDto request) {
 
 		Category category = findCategorybyIdOrThrow(id);
@@ -67,6 +74,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	@Transactional
+	@CacheEvict(value = "category", key = "#id")
 	public void deleteCategory(Long id) {
 
 		Category category = findCategorybyIdOrThrow(id);
