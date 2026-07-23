@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,7 +16,11 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -22,6 +28,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
 import com.oyku.blog.dto.request.post.CreatePostRequestDto;
@@ -33,13 +42,18 @@ import com.oyku.blog.dto.response.comment.CommentResponseDto;
 import com.oyku.blog.dto.response.post.PostResponseDto;
 import com.oyku.blog.entity.Category;
 import com.oyku.blog.entity.Post;
+import com.oyku.blog.entity.User;
 import com.oyku.blog.enums.PostStatus;
+import com.oyku.blog.enums.Role;
 import com.oyku.blog.exception.ResourceNotFoundException;
 import com.oyku.blog.mapper.CommentMapperImpl;
 import com.oyku.blog.mapper.PostMapper;
+import com.oyku.blog.messaging.dto.PostMessage;
+import com.oyku.blog.messaging.producer.PostProducer;
 import com.oyku.blog.model.Comment;
 import com.oyku.blog.repository.CategoryRepository;
 import com.oyku.blog.repository.PostRepository;
+import com.oyku.blog.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
@@ -58,18 +72,58 @@ class PostServiceImplTest {
 
 	@Mock
 	private CommentMapperImpl commentMapperImpl;
-
+	
+	@Mock
+	private PostProducer postProducer;
+	
 	@InjectMocks
 	private PostServiceImpl postService;
 
+	@Mock
+	private UserRepository userRepository;
+	
+	private static final String POST_ID = "1";
+	private User testUser;
+
+	@BeforeEach
+	void setUp() {
+
+	    testUser = new User();
+	    testUser.setId(1L);
+	    testUser.setEmail("test@example.com");
+	    testUser.setRole(Set.of(Role.ADMIN));  
+	}
+	
+	@AfterEach
+	void tearDown() {
+	    SecurityContextHolder.clearContext();
+	}
+	
+	private void mockAuthentication() {
+		  Authentication authentication = mock(Authentication.class);
+		    when(authentication.getName()).thenReturn(testUser.getEmail());
+
+		    SecurityContext securityContext = mock(SecurityContext.class);
+		    when(securityContext.getAuthentication()).thenReturn(authentication);
+
+		    SecurityContextHolder.setContext(securityContext);
+
+		    when(userRepository.findByEmail(testUser.getEmail()))
+		            .thenReturn(Optional.of(testUser));
+	}
+	
 	@Test
 	void shouldCreatePostSuccessfully() {
+
+		mockAuthentication();
 
 		CreatePostRequestDto request = createRequest();
 		Post post = createPost();
 		Category category = createCategory();
 		PostResponseDto response = createResponse();
 
+		doNothing().when(postProducer).sendPostCreated(any(PostMessage.class));
+		
 		when(postMapper.toEntity(request)).thenReturn(post);
 
 		when(categoryRepository.findById(request.getCategoryId())).thenReturn(Optional.of(category));
@@ -90,7 +144,7 @@ class PostServiceImplTest {
 		verify(slugService).generateSlug(request.getTitle());
 		verify(postRepository).save(post);
 		verify(slugService).generateSlug(response.getTitle());
-
+		verify(postProducer).sendPostCreated(any(PostMessage.class));
 		verify(postMapper).toEntity(request);
 		verify(postMapper).toResponseDto(post);
 		verify(categoryRepository).findById(request.getCategoryId());
@@ -168,6 +222,8 @@ class PostServiceImplTest {
 	@Test
 	void shouldUpdatePostSuccessfully() {
 
+		mockAuthentication();
+
 		String postId = "1";
 
 		UpdatePostRequestDto request = new UpdatePostRequestDto();
@@ -225,6 +281,9 @@ class PostServiceImplTest {
 
 	@Test
 	void shouldNotGenerateSlugWhenTitleIsBlank() {
+		
+		mockAuthentication();
+
 		String postId = "1";
 		UpdatePostRequestDto request = new UpdatePostRequestDto();
 
@@ -246,6 +305,9 @@ class PostServiceImplTest {
 
 	@Test
 	void shouldNotGenerateSlugWhenTitleIsNull() {
+		
+		mockAuthentication();
+
 		String postId = "1";
 		UpdatePostRequestDto request = new UpdatePostRequestDto();
 
@@ -267,6 +329,8 @@ class PostServiceImplTest {
 
 	@Test
 	void shouldDeletePostSuccessfully() {
+
+		mockAuthentication();
 
 		String postId = "1";
 		Post post = createPost();
@@ -298,6 +362,8 @@ class PostServiceImplTest {
 
 	@Test
 	void shouldDraftPostSuccessfully() {
+
+		mockAuthentication();
 
 		String postId = "1";
 		Post post = createPost();
@@ -337,6 +403,8 @@ class PostServiceImplTest {
 
 	@Test
 	void shouldPublishPostSuccessfully() {
+		
+		mockAuthentication();
 
 		String postId = "1";
 		Post post = createPost();
@@ -396,11 +464,10 @@ class PostServiceImplTest {
 
 	@Test
 	void shouldThrowExceptionWhenGettingCommentsOfNonExistingPost() {
-		String postId = "1";
 
-		when(postRepository.findById(postId)).thenReturn(Optional.empty());
+		when(postRepository.findById(POST_ID)).thenReturn(Optional.empty());
 
-		assertThrows(ResourceNotFoundException.class, () -> postService.getCommentsByPostId(postId));
+		assertThrows(ResourceNotFoundException.class, () -> postService.getCommentsByPostId(POST_ID));
 
 		verify(commentMapperImpl, never()).toResponseDto(any());
 	}
@@ -435,7 +502,9 @@ class PostServiceImplTest {
 
 	@Test
 	void shouldAddTagsSuccessfully() {
-
+		
+		mockAuthentication();
+		
 		String postId = "1";
 
 		UpdateTagsRequestDto request = new UpdateTagsRequestDto();
@@ -478,6 +547,8 @@ class PostServiceImplTest {
 	@Test
 	void shouldNotAddDuplicateTag() {
 
+		mockAuthentication();
+
 		String postId = "1";
 
 		Post post = createPost();
@@ -505,6 +576,8 @@ class PostServiceImplTest {
 
 	@Test
 	void shouldRemoveTagsSuccessfully() {
+
+		mockAuthentication();
 
 		String postId = "1";
 		Post post = createPost();
@@ -564,6 +637,7 @@ class PostServiceImplTest {
 		Post post = new Post();
 		post.setTitle("Test Title");
 		post.setTags(new ArrayList<>());
+		post.setUser(testUser);
 		return post;
 	}
 
