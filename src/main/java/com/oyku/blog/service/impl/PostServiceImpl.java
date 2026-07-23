@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.oyku.blog.Security.config.RabbitMQConfig;
 import com.oyku.blog.dto.request.comment.CreateCommentRequestDto;
 import com.oyku.blog.dto.request.post.CreatePostRequestDto;
 import com.oyku.blog.dto.request.post.RemoveTagsRequestDto;
@@ -37,6 +38,8 @@ import com.oyku.blog.exception.ForbiddenException;
 import com.oyku.blog.exception.ResourceNotFoundException;
 import com.oyku.blog.mapper.CommentMapperImpl;
 import com.oyku.blog.mapper.PostMapper;
+import com.oyku.blog.messaging.dto.PostMessage;
+import com.oyku.blog.messaging.producer.PostProducer;
 import com.oyku.blog.model.Comment;
 import com.oyku.blog.repository.CategoryRepository;
 import com.oyku.blog.repository.PostRepository;
@@ -56,6 +59,7 @@ public class PostServiceImpl implements PostService {
 	private final UserRepository userRepository;
 	private final PostMapper postMapper;
 	private final SlugService slugService;
+	private final PostProducer postProducer;
 
 	@Override
 	@Transactional
@@ -76,7 +80,14 @@ public class PostServiceImpl implements PostService {
 		post.setUser(currentUser);
 
 		Post savedPost = postRepository.save(post);
+
+		PostMessage message = PostMessage.builder().postId(savedPost.getId()).title(savedPost.getTitle())
+				.authorName(savedPost.getUser().getName()).status(savedPost.getStatus().name()).build();
+
+		postProducer.sendPostCreated(message);
+
 		return postMapper.toResponseDto(savedPost);
+
 	}
 
 	@Override
@@ -112,10 +123,9 @@ public class PostServiceImpl implements PostService {
 	@Transactional
 	@CachePut(value = "post", key = "#id")
 	public PostResponseDto updatePost(String id, UpdatePostRequestDto request) {
-				Post post = findPostbyIdOrThrow(id);
+		Post post = findPostbyIdOrThrow(id);
 
-	validatePostOwner(post);
-		
+		validatePostOwner(post);
 
 		postMapper.updateEntityFromDto(request, post);
 
@@ -134,7 +144,7 @@ public class PostServiceImpl implements PostService {
 		Post post = findPostbyIdOrThrow(id);
 
 		validatePostOwner(post);
-		
+
 		for (String tag : request.getTags()) {
 
 			if (!post.getTags().contains(tag)) {
@@ -154,7 +164,7 @@ public class PostServiceImpl implements PostService {
 		Post post = findPostbyIdOrThrow(id);
 
 		validatePostOwner(post);
-		
+
 		post.getTags().removeAll(request.getTags());
 
 		Post updatedPost = postRepository.save(post);
@@ -168,7 +178,7 @@ public class PostServiceImpl implements PostService {
 
 		Post post = findPostbyIdOrThrow(id);
 		validatePostOwner(post);
-		
+
 		postRepository.delete(post);
 	}
 
@@ -179,10 +189,11 @@ public class PostServiceImpl implements PostService {
 		Post post = findPostbyIdOrThrow(id);
 
 		validatePostOwner(post);
-		
+
 		post.setStatus(PostStatus.PUBLISHED);
 
 		Post publishedPost = postRepository.save(post);
+
 		return postMapper.toResponseDto(publishedPost);
 	}
 
@@ -193,7 +204,7 @@ public class PostServiceImpl implements PostService {
 		Post post = findPostbyIdOrThrow(id);
 
 		validatePostOwner(post);
-		
+
 		post.setStatus(PostStatus.DRAFT);
 
 		Post draftPost = postRepository.save(post);
@@ -215,15 +226,9 @@ public class PostServiceImpl implements PostService {
 
 		Page<Post> postsPage = postRepository.findAll(pageable);
 
-		return new PageResponse<>(
-				postsPage.getContent().stream().map(postMapper::toResponseDto).toList(),
-				   postsPage.getNumber(),
-			        postsPage.getSize(),
-			        postsPage.getTotalElements(),
-			        postsPage.getTotalPages(),
-			        postsPage.isFirst(),
-			        postsPage.isLast(),
-			        postsPage.getNumberOfElements());
+		return new PageResponse<>(postsPage.getContent().stream().map(postMapper::toResponseDto).toList(),
+				postsPage.getNumber(), postsPage.getSize(), postsPage.getTotalElements(), postsPage.getTotalPages(),
+				postsPage.isFirst(), postsPage.isLast(), postsPage.getNumberOfElements());
 
 	}
 
@@ -290,14 +295,13 @@ public class PostServiceImpl implements PostService {
 
 		return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 	}
-	
+
 	private void validatePostOwner(Post post) {
 		User currentUser = getCurrentUser();
-			
-			if (!post.getUser().getId().equals(currentUser.getId())
-			        && !currentUser.getRole().equals(Role.ADMIN)) {
-			    throw new ForbiddenException("You are not allowed to modify this post.");
-			}
+
+		if (!post.getUser().getId().equals(currentUser.getId()) && !currentUser.getRole().equals(Role.ADMIN)) {
+			throw new ForbiddenException("You are not allowed to modify this post.");
 		}
-		
+	}
+
 }
